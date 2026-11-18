@@ -43,8 +43,9 @@ def _load_default_log_config(output_path=None, log_format=None):
 
 
 def _create_default_log_config(output_path=None, log_format=None):
+    import copy as _copy
     from mlflow_export_import.common.default_logging_config import config
-    cfg = config.copy()
+    cfg = _copy.deepcopy(config)
     if log_format:
         cfg["formatters"]["simple"]["format"] = log_format
 
