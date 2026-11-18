@@ -122,15 +122,21 @@ def export_experiment(
 
     # Export Logged Models
     if has_logged_model_support():
-        ok_logged_models, failed_logged_models = export_logged_models.export_logged_models(
-            experiment_ids = [exp.experiment_id],
-            output_dir = os.path.join(output_dir, "logged_models"),
-            logged_models_filter = logged_models_filter,
-            mlflow_client = mlflow_client,
-        )
-        info_attr["ok_logged_models"] = len(ok_logged_models)
-        info_attr["failed_logged_models"] = len(failed_logged_models)
-        mlflow_attr["logged_models"] = ok_logged_models
+        try:
+            ok_logged_models, failed_logged_models = export_logged_models.export_logged_models(
+                experiment_ids = [exp.experiment_id],
+                output_dir = os.path.join(output_dir, "logged_models"),
+                logged_models_filter = logged_models_filter,
+                mlflow_client = mlflow_client,
+            )
+            info_attr["ok_logged_models"] = len(ok_logged_models)
+            info_attr["failed_logged_models"] = len(failed_logged_models)
+            mlflow_attr["logged_models"] = ok_logged_models
+        except Exception as e:
+            _logger.warning(f"Failed to export logged models for experiment '{exp.name}': {e}")
+            info_attr["ok_logged_models"] = 0
+            info_attr["failed_logged_models"] = -1
+            mlflow_attr["logged_models"] = []
 
     # Export traces
     if has_trace_support():
@@ -144,8 +150,7 @@ def export_experiment(
             info_attr["failed_traces"] = len(failed_traces)
             mlflow_attr["traces"] = ok_traces
         except Exception as e:
-            _logger.error(f"Trace export failed for experiment {exp.experiment_id} -- "
-                           f"continuing without traces for this experiment: {e}")
+            _logger.warning(f"Failed to export traces for experiment '{exp.name}': {e}")
             info_attr["ok_traces"] = 0
             info_attr["failed_traces"] = -1
             mlflow_attr["traces"] = []
