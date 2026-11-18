@@ -145,8 +145,7 @@ def import_experiment(
                     )
                     imported_traces.append(trace_id)
                 except Exception as e:
-                    _logger.error(f"Trace import failed for trace {trace_id} on run {dst_run_id} -- "
-                                   f"continuing with remaining runs/traces: {e}")
+                    _logger.warning(f"Failed to import trace {trace_id} for run {dst_run_id}: {e}")
 
 
     ## Importing the logged models that are not part of run
@@ -173,7 +172,8 @@ def import_experiment(
                     mlflow_client=mlflow_client,
                 )
             except Exception as e:
-                _logger.error(f"Trace import failed for trace {trace_id} -- continuing: {e}")
+                _logger.warning(f"Failed to import trace {trace_id} (not part of a run): {e}")
+
 
 
     _logger.info(f"Imported {len(run_ids)} runs into experiment '{experiment_name}' from '{input_dir}'")
