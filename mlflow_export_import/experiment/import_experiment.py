@@ -146,6 +146,8 @@ def import_experiment(
                     imported_traces.append(trace_id)
                 except Exception as e:
                     _logger.warning(f"Failed to import trace {trace_id} for run {dst_run_id}: {e}")
+                except Exception as e:
+                    _logger.warning(f"Failed to import trace {trace_id} for run {dst_run_id}: {e}")
 
 
     ## Importing the logged models that are not part of run
@@ -173,6 +175,7 @@ def import_experiment(
                 )
             except Exception as e:
                 _logger.warning(f"Failed to import trace {trace_id} (not part of a run): {e}")
+            
 
 
 

@@ -94,7 +94,7 @@ class HttpClient(BaseHttpClient):
                 http_status_code=401
             )
         self.host = host
-        self.api_uri = os.path.join(host, api_name)
+        self.api_uri = f"{host.rstrip('/')}/{api_name}"
         self.token = token
 
 

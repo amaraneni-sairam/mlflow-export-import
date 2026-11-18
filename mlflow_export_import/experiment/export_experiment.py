@@ -154,6 +154,11 @@ def export_experiment(
             info_attr["ok_traces"] = 0
             info_attr["failed_traces"] = -1
             mlflow_attr["traces"] = []
+        except Exception as e:
+            _logger.warning(f"Failed to export traces for experiment '{exp.name}': {e}")
+            info_attr["ok_traces"] = 0
+            info_attr["failed_traces"] = -1
+            mlflow_attr["traces"] = []
 
     if export_permissions:
         mlflow_attr["permissions"] = ws_permissions_utils.get_experiment_permissions(dbx_client, exp.experiment_id)
