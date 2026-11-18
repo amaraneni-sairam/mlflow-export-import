@@ -157,11 +157,15 @@ def import_experiment(
     if mlflow_dct.get("traces"):
         remaining_traces = set(mlflow_dct["traces"]) - set(imported_traces)
         for trace_id in remaining_traces:
-            import_trace(
-                input_dir=os.path.join(f"{input_dir}/traces", trace_id),
-                experiment_name=experiment_name,
-                mlflow_client=mlflow_client,
-            )
+            try:
+                import_trace(
+                    input_dir=os.path.join(f"{input_dir}/traces", trace_id),
+                    experiment_name=experiment_name,
+                    mlflow_client=mlflow_client,
+                )
+            except Exception as e:
+                _logger.error(f"Trace import failed for trace {trace_id} -- continuing: {e}")
+
 
     _logger.info(f"Imported {len(run_ids)} runs into experiment '{experiment_name}' from '{input_dir}'")
     if len(failed_run_ids) > 0:
