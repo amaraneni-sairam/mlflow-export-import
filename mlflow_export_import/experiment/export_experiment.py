@@ -134,14 +134,21 @@ def export_experiment(
 
     # Export traces
     if has_trace_support():
-        ok_traces, failed_traces = export_traces.export_traces(
-            experiment_ids=[exp.experiment_id],
-            output_dir=os.path.join(output_dir, "traces"),
-            mlflow_client=mlflow_client,
-        )
-        info_attr["ok_traces"] = len(ok_traces)
-        info_attr["failed_traces"] = len(failed_traces)
-        mlflow_attr["traces"] = ok_traces
+        try:
+            ok_traces, failed_traces = export_traces.export_traces(
+                experiment_ids=[exp.experiment_id],
+                output_dir=os.path.join(output_dir, "traces"),
+                mlflow_client=mlflow_client,
+            )
+            info_attr["ok_traces"] = len(ok_traces)
+            info_attr["failed_traces"] = len(failed_traces)
+            mlflow_attr["traces"] = ok_traces
+        except Exception as e:
+            _logger.error(f"Trace export failed for experiment {exp.experiment_id} -- "
+                           f"continuing without traces for this experiment: {e}")
+            info_attr["ok_traces"] = 0
+            info_attr["failed_traces"] = -1
+            mlflow_attr["traces"] = []
 
     if export_permissions:
         mlflow_attr["permissions"] = ws_permissions_utils.get_experiment_permissions(dbx_client, exp.experiment_id)
