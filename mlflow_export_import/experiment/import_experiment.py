@@ -130,13 +130,18 @@ def import_experiment(
         # Import traces associated to the run
         if src_run_dct.get("traces"):
             for trace_id in src_run_dct["traces"]:
-                import_trace(
-                    input_dir=os.path.join(f"{input_dir}/traces", trace_id),
-                    experiment_name=experiment_name,
-                    run_id=dst_run_id,
-                    mlflow_client=mlflow_client,
-                )
-                imported_traces.append(trace_id)
+                try:
+                    import_trace(
+                        input_dir=os.path.join(f"{input_dir}/traces", trace_id),
+                        experiment_name=experiment_name,
+                        run_id=dst_run_id,
+                        mlflow_client=mlflow_client,
+                    )
+                    imported_traces.append(trace_id)
+                except Exception as e:
+                    _logger.error(f"Trace import failed for trace {trace_id} on run {dst_run_id} -- "
+                                   f"continuing with remaining runs/traces: {e}")
+
 
     ## Importing the logged models that are not part of run
     if mlflow_dct.get("logged_models"):
