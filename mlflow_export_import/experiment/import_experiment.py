@@ -101,27 +101,33 @@ def import_experiment(
         # Logged Models
         if "model_inputs" in src_run_dct["inputs"]:
             for model in src_run_dct["inputs"]["model_inputs"]:
-                import_logged_model(
-                    input_dir = os.path.join(f"{input_dir}/logged_models", model['model_id']),
-                    experiment_name = experiment_name,
-                    run_id = dst_run_id,
-                    mlflow_client = mlflow_client,
-                    model_type = "input",
-                    step = model['step'],
-                )
-                imported_logged_models.append(model['model_id'])
+                try:
+                    import_logged_model(
+                        input_dir = os.path.join(f"{input_dir}/logged_models", model['model_id']),
+                        experiment_name = experiment_name,
+                        run_id = dst_run_id,
+                        mlflow_client = mlflow_client,
+                        model_type = "input",
+                        step = model['step'],
+                    )
+                    imported_logged_models.append(model['model_id'])
+                except Exception as e:
+                    _logger.warning(f"Failed to import logged model (input) {model['model_id']} for run {dst_run_id}: {e}")
 
         if "outputs" in src_run_dct:
             for model in src_run_dct["outputs"]["model_outputs"]:
-                import_logged_model(
-                    input_dir = os.path.join(f"{input_dir}/logged_models", model['model_id']),
-                    experiment_name = experiment_name,
-                    run_id = dst_run_id,
-                    mlflow_client = mlflow_client,
-                    model_type = "output",
-                    step = model['step'],
-                )
-                imported_logged_models.append(model['model_id'])
+                try:
+                    import_logged_model(
+                        input_dir = os.path.join(f"{input_dir}/logged_models", model['model_id']),
+                        experiment_name = experiment_name,
+                        run_id = dst_run_id,
+                        mlflow_client = mlflow_client,
+                        model_type = "output",
+                        step = model['step'],
+                    )
+                    imported_logged_models.append(model['model_id'])
+                except Exception as e:
+                    _logger.warning(f"Failed to import logged model (output) {model['model_id']} for run {dst_run_id}: {e}")
 
         # in logged models after logging the metrics, run status is changing back to Finished. So setting the status again.
         default_status = RunStatus.to_string(RunStatus.FINISHED)
@@ -147,11 +153,14 @@ def import_experiment(
     if mlflow_dct.get("logged_models"):
         remaining_logged_models = set(mlflow_dct["logged_models"]) - set(imported_logged_models)
         for model_id in remaining_logged_models:
-            import_logged_model(
-                input_dir=os.path.join(f"{input_dir}/logged_models", model_id),
-                experiment_name=experiment_name,
-                mlflow_client=mlflow_client,
-            )
+            try:
+                import_logged_model(
+                    input_dir=os.path.join(f"{input_dir}/logged_models", model_id),
+                    experiment_name=experiment_name,
+                    mlflow_client=mlflow_client,
+                )
+            except Exception as e:
+                _logger.warning(f"Failed to import logged model {model_id} (not part of a run): {e}")
 
     ## Importing the traces that are not part of run
     if mlflow_dct.get("traces"):
