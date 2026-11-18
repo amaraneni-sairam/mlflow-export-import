@@ -99,11 +99,12 @@ def import_logged_model(
         from mlflow.entities import LoggedModelStatus
         if logged_model is not None:
             mlflow_client.finalize_logged_model(logged_model.model_id, LoggedModelStatus.FAILED)
-        mlflow_client.set_terminated(run_id, RunStatus.to_string(RunStatus.FAILED))
-
+        if run_id is not None:
+            mlflow_client.set_terminated(run_id, RunStatus.to_string(RunStatus.FAILED))
         import traceback
         traceback.print_exc()
         raise MlflowExportImportException(e, f"Importing logged-model {src_logged_model_dct['name']} of experiment '{exp.name}' failed")
+
 
 
 @click.command()
